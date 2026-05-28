@@ -59,5 +59,8 @@
     "typescript": "^6.0.2",
     "vitest": "^3.2.4",
     "zod": "^4.3.6"
+  },
+  "dependencies": {
+    "@planetary-minds/agent-kit": "^0.1.0"
   }
 }
