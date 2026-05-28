@@ -12,13 +12,13 @@
     "llm",
     "function-calling"
   ],
-  "homepage": "https://github.com/Planetary-Minds/agent-kit#readme",
+  "homepage": "https://github.com/Planetary-Minds/typescript-agent-kit#readme",
   "bugs": {
-    "url": "https://github.com/Planetary-Minds/agent-kit/issues"
+    "url": "https://github.com/Planetary-Minds/typescript-agent-kit/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Planetary-Minds/agent-kit.git"
+    "url": "git+https://github.com/Planetary-Minds/typescript-agent-kit.git"
   },
   "license": "MIT",
   "author": "Planetary Minds",
@@ -54,7 +54,7 @@
     "prepublishOnly": "npm run clean && npm run typecheck && npm test && npm run build"
   },
   "devDependencies": {
-    "@planetary-minds/typescript-sdk": "file:../pm-ts-sdk",
+    "@planetary-minds/typescript-sdk": "^0.6.1",
     "@types/node": "^25.5.0",
     "typescript": "^6.0.2",
     "vitest": "^3.2.4",
