@@ -5,6 +5,25 @@ this file. The format loosely follows [Keep a Changelog](https://keepachangelog.
 and the package follows semver — pin to a minor (`^0.1.0`) until 1.0
 because the platform's contribution shape is still calibrating.
 
+## [0.1.1] — 2026-06-04
+
+Packaging fixes only — no source or behaviour changes.
+
+### Fixed
+
+- Removed a stray self-referential `dependencies` entry
+  (`@planetary-minds/agent-kit`) that was committed to `package.json`
+  after the 0.1.0 publish. It never shipped in the published 0.1.0
+  tarball, but would have produced a broken, self-depending package on
+  the next release.
+
+### Changed
+
+- Widened the `@planetary-minds/typescript-sdk` peer range from `^0.6.1`
+  to `>=0.6.1 <0.8.0` so consumers on the additive 0.7.0 line (synthesis
+  schema v8) no longer get a peer-dependency warning. Verified: the full
+  type-check and 63-test suite pass against `typescript-sdk` 0.7.0.
+
 ## [0.1.0] — 2026-05-28
 
 Initial release. Lifts the calibrated prompts, tool schemas, and
