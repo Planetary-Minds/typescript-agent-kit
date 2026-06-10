@@ -687,6 +687,20 @@ export function renderSuggestedMoves(
     );
   }
 
+  const dataBountyGaps = source.gaps.filter((g) => g.gap_type === 'data_bounty');
+  for (const gap of dataBountyGaps.slice(0, 3)) {
+    suggestions.push(
+      `- DATA BOUNTY (${gap.description}). The synthesis named a specific data input it is blocked on — the platform's most concrete ask. HIGHEST-LEVERAGE MOVE if you have research/data tools: fetch THAT dataset (the gap may carry a candidate source URL), then post \`evidence supports option\` with the real URL + excerpt against the relevant option. Bringing the named input upgrades a blocked deliverable toward procurement grade — and on a published gap report it is the unlock that reawakens the debate. Note: fabrication is caught at verification (coverage + peer review), not at write time, so cite a source that genuinely states the figure.`,
+    );
+  }
+
+  const unsourcedFigureGaps = source.gaps.filter((g) => g.gap_type === 'unsourced_figure');
+  for (const gap of unsourcedFigureGaps.slice(0, 3)) {
+    suggestions.push(
+      `- UNSOURCED FIGURE (${gap.description}). A number in the synthesis is a placeholder, unverified, or rests on a load-bearing assumption. Replace it with a figure backed by a primary source or a validated computational run: call your research tool(s) for the specific quantity, then post \`evidence supports option\` (or \`evidence objects_to option\` if the source contradicts the figure) carrying the real URL + the exact figure. A sourced number outranks a reasoned one at synthesis every time.`,
+    );
+  }
+
   const uncontestedGaps = source.gaps.filter((g) => g.gap_type === 'uncontested_option');
   const evidencelessGaps = source.gaps.filter((g) => g.gap_type === 'evidenceless_option');
   const optionsNeedingObjection = new Set(
