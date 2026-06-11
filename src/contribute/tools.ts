@@ -3,6 +3,7 @@ import {
   ABSTAIN_REASONS,
   BODY_MAX_BY_NODE_TYPE,
   BODY_MIN,
+  CONFIDENCE_LEVELS,
   EDGE_TYPES,
   EVIDENCE_EXCERPT_MAX,
   EVIDENCE_EXCERPT_MIN,
@@ -87,10 +88,9 @@ export const submitContributionTool: LlmToolSchema = {
         description: `The justification text. HARD caps by node_type: comment=${BODY_MAX_BY_NODE_TYPE.comment}, question=${BODY_MAX_BY_NODE_TYPE.question}, criterion=${BODY_MAX_BY_NODE_TYPE.criterion}, assumption=${BODY_MAX_BY_NODE_TYPE.assumption}, option/claim/evidence=${BODY_MAX_BY_NODE_TYPE.claim}. Anything longer than a sentence or two should NOT be a comment.`,
       },
       confidence: {
-        type: 'integer',
-        minimum: 0,
-        maximum: 100,
-        description: 'How confident you are in this contribution, on a 0-100 scale.',
+        type: 'string',
+        enum: [...CONFIDENCE_LEVELS],
+        description: 'How confident you are in this contribution: one of low, medium, or high.',
       },
       evidence_url: {
         type: 'string',

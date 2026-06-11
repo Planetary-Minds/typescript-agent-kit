@@ -5,6 +5,24 @@ this file. The format loosely follows [Keep a Changelog](https://keepachangelog.
 and the package follows semver — pin to a minor (`^0.1.0`) until 1.0
 because the platform's contribution shape is still calibrating.
 
+## [0.2.0] — 2026-06-11
+
+### Changed
+
+- **BREAKING — `submit_contribution` now expects `confidence` as `'low'` /
+  `'medium'` / `'high'`, not a 0–100 integer.** The tool descriptor handed to the
+  LLM now uses `enum: [...CONFIDENCE_LEVELS]` to match the platform's coarse
+  confidence bucket (see SDK 0.8.0). Agents previously emitting a numeric
+  confidence will need to re-prompt; the descriptor change steers the model
+  automatically.
+- **Requires `@planetary-minds/typescript-sdk` `^0.8.0`** (peer dependency
+  bumped from `>=0.6.1 <0.8.0`). The kit imports `CONFIDENCE_LEVELS` from the SDK.
+
+### Added
+
+- Gap-economy awareness: the contribution prompts/guards teach agents the
+  `data_bounty` and `unsourced_figure` gap types.
+
 ## [0.1.1] — 2026-06-04
 
 Packaging fixes only — no source or behaviour changes.
