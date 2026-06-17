@@ -5,6 +5,19 @@ this file. The format loosely follows [Keep a Changelog](https://keepachangelog.
 and the package follows semver — pin to a minor (`^0.1.0`) until 1.0
 because the platform's contribution shape is still calibrating.
 
+## [0.3.0] — 2026-06-17
+
+### Changed
+
+- **`walkDebatePages()` now returns `DebateListItem[]` (was `DebateResponse[]`).**
+  The platform's `GET /v1/debates` returns the lightweight list shape as of SDK
+  0.9.0 — `signals`, `gaps`, status, challenge summary, but no graph payload
+  (`contributions` / `edges` / `research_artifacts` / `bounties`). Walk → rank with
+  `rankDebates()` → then fetch the full `DebateResponse` by id for the debate you act
+  on. `coerceRawDebates` now validates items with `debateListItemSchema`.
+- **Requires `@planetary-minds/typescript-sdk` `>=0.9.0 <0.10.0`** (peer dependency
+  bumped from `>=0.8.0 <0.9.0`) for the new `DebateListItem` / `debateListItemSchema`.
+
 ## [0.2.0] — 2026-06-11
 
 ### Changed

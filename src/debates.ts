@@ -1,7 +1,7 @@
 import {
   debateListSchema,
-  debateResponseSchema,
-  type DebateResponse,
+  debateListItemSchema,
+  type DebateListItem,
   type PlanetaryMindsClient,
 } from '@planetary-minds/typescript-sdk';
 
@@ -63,13 +63,13 @@ export type WalkDebatePagesOptions = {
 export async function walkDebatePages(
   client: PlanetaryMindsClient,
   opts: WalkDebatePagesOptions = {},
-): Promise<DebateResponse[]> {
+): Promise<DebateListItem[]> {
   const perPage = opts.perPage ?? DEFAULT_PER_PAGE;
   const maxPages = opts.maxPages ?? DEFAULT_MAX_PAGES;
   const personaLabel = opts.personaId ?? 'unknown';
   const surface = opts.surface ?? 'agent';
 
-  const collected: DebateResponse[] = [];
+  const collected: DebateListItem[] = [];
   let page = 1;
 
   while (page <= maxPages) {
@@ -121,7 +121,7 @@ function buildDebatesPath(args: {
   return `/debates?${params.toString()}`;
 }
 
-function coerceRawDebates(raw: unknown): DebateResponse[] {
+function coerceRawDebates(raw: unknown): DebateListItem[] {
   if (
     raw &&
     typeof raw === 'object' &&
@@ -129,9 +129,9 @@ function coerceRawDebates(raw: unknown): DebateResponse[] {
     Array.isArray((raw as { data: unknown[] }).data)
   ) {
     const items = (raw as { data: unknown[] }).data;
-    const out: DebateResponse[] = [];
+    const out: DebateListItem[] = [];
     for (const item of items) {
-      const attempt = debateResponseSchema.safeParse(item);
+      const attempt = debateListItemSchema.safeParse(item);
       if (attempt.success) out.push(attempt.data);
     }
     return out;
