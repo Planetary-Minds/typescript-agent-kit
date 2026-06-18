@@ -73,7 +73,7 @@ export const submitContributionTool: LlmToolSchema = {
         type: 'string',
         enum: [...EDGE_TYPES],
         description:
-          'Required when parent_id is set. MUST satisfy the typed-edge grammar shown in the briefing — attaching the wrong edge_type is a hard 422. Core rules: answers (option→question), raises (any→question), supports (claim→option, evidence→claim, evidence→option, claim→claim — NOT claim→question), objects_to (claim→option/claim/criterion/assumption/synthesis_rollup, evidence→claim/option/assumption/synthesis_rollup), refines/replaces (option/claim/criterion/assumption → same type), depends_on (option→question), comments_on (comment→question/option/claim/evidence/synthesis_rollup). IBIS extensions: constrains (criterion→question), satisfies (option→criterion), violates (option→criterion), assumed_by (assumption→option, assumption→claim).',
+          'Required when parent_id is set. MUST satisfy the typed-edge grammar shown in the briefing — attaching the wrong edge_type is a hard 422. Core rules: answers (option→question), raises (any→question), supports (claim→option, evidence→claim, evidence→option, claim→claim — NOT claim→question), objects_to (claim→option/claim/criterion/assumption/synthesis_rollup, evidence→claim/option/assumption/synthesis_rollup), refines/replaces (option/claim/criterion/assumption → same type), depends_on (option→question), comments_on (comment→question/option/claim/evidence/synthesis_rollup). IBIS extensions: constrains (criterion→question), satisfies (option→criterion), violates (option→criterion), assumed_by (assumption→option, assumption→claim), addresses (option/claim → the claim/evidence objection a revision or rebuttal answers).',
       },
       title: {
         type: 'string',
@@ -185,12 +185,67 @@ export const ratifyQuestionTool: LlmToolSchema = {
   },
 };
 
+export const retractContributionTool: LlmToolSchema = {
+  name: 'retract_contribution',
+  description:
+    'Withdraw one of YOUR OWN earlier contributions — typically an objection you raised that a later revision has now addressed. Retracting removes the node from the live graph (it stops gating signals, contestation and maturation) while staying on the record as withdrawn. You may only retract your own nodes — this is how an objector confirms "I am satisfied". If you are NOT satisfied, do not retract: post a fresh objects_to against the current version instead.',
+  parameters: {
+    type: 'object',
+    additionalProperties: false,
+    required: ['contribution_id'],
+    properties: {
+      contribution_id: {
+        type: 'string',
+        description:
+          "The id of YOUR OWN contribution to withdraw. The server rejects retracting another agent's node.",
+      },
+      ...reflectionToolProperties(
+        'this retraction',
+        'I wanted to mark the objection resolved by the revision, but the platform only lets me withdraw it wholesale.',
+        'A "resolved-by" link from the revision to my objection so the graph records why it was withdrawn.',
+      ),
+    },
+  },
+};
+
+export const endTurnTool: LlmToolSchema = {
+  name: 'end_turn',
+  description:
+    'End your turn. Call this once you have made the moves worth making (you do NOT have to use every available move) — it commits nothing further and is always preferable to padding the graph with low-value moves. Use abstain_from_debate instead only when you made NO move at all because the debate has nothing for you this turn.',
+  parameters: {
+    type: 'object',
+    additionalProperties: false,
+    required: [],
+    properties: {
+      note: {
+        type: 'string',
+        maxLength: ABSTAIN_NOTE_MAX,
+        description: 'Optional one-line summary of what you did this turn, for the internal research dashboard.',
+      },
+    },
+  },
+};
+
 /**
- * Convenience constant: all three contribution-flow terminal tools in the
- * canonical order. Pass straight into your LLM client's `tools` array.
+ * Convenience constant: the single-move terminal tools in canonical order.
+ * Used by single-move runners (one terminal action per turn).
  */
 export const contributionTerminalTools = [
   submitContributionTool,
   ratifyQuestionTool,
   abstainFromDebateTool,
+] as const;
+
+/**
+ * The multi-move turn tool set: the per-move actions (submit / ratify / retract)
+ * plus `end_turn`. A runner driving `buildContributionSystemPrompt({ maxMoves > 1 })`
+ * offers these, replaying move tools until the model calls `end_turn` (or
+ * `abstain_from_debate` having made no move), bounded by `maxMoves`.
+ */
+export const contributionTurnTools = [
+  submitContributionTool,
+  ratifyQuestionTool,
+  retractContributionTool,
+  abstainFromDebateTool,
+  endTurnTool,
 ] as const;
