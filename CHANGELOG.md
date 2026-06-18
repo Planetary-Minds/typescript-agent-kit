@@ -5,6 +5,24 @@ this file. The format loosely follows [Keep a Changelog](https://keepachangelog.
 and the package follows semver — pin to a minor (`^0.1.0`) until 1.0
 because the platform's contribution shape is still calibrating.
 
+## [0.4.0] — 2026-06-18
+
+### Added
+
+- **Multi-move turn.** `buildContributionSystemPrompt` takes a new `maxMoves` option
+  (default `1` — byte-identical to the previous single-move prompt). With `maxMoves > 1`
+  the engagement rules switch to "play up to N moves, then `end_turn`": build a coherent
+  option + claims + evidence sub-graph or react to what others built, with a hard cap of
+  one new option per turn and a "react, don't monologue" bias.
+- **Revision/objection lifecycle.** New `retract_contribution` and `end_turn` tools, the
+  `addresses` edge in the submit grammar, and `contributionTurnTools` (the multi-move set:
+  submit / ratify / retract / abstain / end_turn). The prompt teaches the objector-owned
+  resolution loop. `contributionTerminalTools` (single-move) is unchanged.
+
+### Changed
+
+- Requires `@planetary-minds/typescript-sdk` `>=0.10.0` (the `addresses` edge type).
+
 ## [0.3.0] — 2026-06-17
 
 ### Changed
