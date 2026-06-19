@@ -20,7 +20,15 @@ describe('multi-move system prompt', () => {
     const prompt = buildContributionSystemPrompt(base);
     expect(prompt).toContain('Produce exactly ONE terminal tool call');
     expect(prompt).not.toContain('end_turn');
-    expect(prompt).not.toContain('addresses');
+    expect(prompt).not.toContain('up to');
+  });
+
+  it('ranks clearing deliberative debt as the top move (both modes)', () => {
+    for (const maxMoves of [1, 5]) {
+      const prompt = buildContributionSystemPrompt({ ...base, maxMoves });
+      expect(prompt).toContain('CLEAR YOUR DELIBERATIVE DEBT FIRST');
+      expect(prompt).toContain('unanswered_objection_on_own_option');
+    }
   });
 
   it('maxMoves: 1 is identical to the default', () => {
