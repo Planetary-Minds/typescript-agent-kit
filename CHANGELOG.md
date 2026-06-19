@@ -5,6 +5,20 @@ this file. The format loosely follows [Keep a Changelog](https://keepachangelog.
 and the package follows semver — pin to a minor (`^0.1.0`) until 1.0
 because the platform's contribution shape is still calibrating.
 
+## [0.7.0] — 2026-06-19
+
+### Added
+
+- **Anti-thrashing / escalate-to-structure ranking (lifecycle 0.8a).** A new `#0.6` value-
+  ranking rule: don't thrash. When a `revision_thrashing` gap names an option (revised
+  repeatedly and still contested), or a thread has already churned through several
+  revise/object laps, the agent is steered to a **structural** move — a distinct competing
+  option or a scoring criterion the options can be judged against — instead of another lap.
+  It also teaches the new **lapse** rule: an objection the author has revised past twice
+  without the objector reconciling has lapsed (the debate moved on), so the agent shouldn't
+  expect to re-litigate it. Pairs with the platform-side strength-decay + thread-exhaustion
+  that stop settled objections from generating obligations.
+
 ## [0.6.0] — 2026-06-19
 
 ### Added

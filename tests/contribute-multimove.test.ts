@@ -30,6 +30,8 @@ describe('multi-move system prompt', () => {
       expect(prompt).toContain('unanswered_objection_on_own_option');
       expect(prompt).toContain('CLOSE YOUR ANSWERED OBJECTIONS NEXT');
       expect(prompt).toContain('objection_closure_outstanding');
+      expect(prompt).toContain('DON\'T THRASH — ESCALATE TO STRUCTURE');
+      expect(prompt).toContain('revision_thrashing');
     }
   });
 
