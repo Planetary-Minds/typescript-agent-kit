@@ -23,11 +23,13 @@ describe('multi-move system prompt', () => {
     expect(prompt).not.toContain('up to');
   });
 
-  it('ranks clearing deliberative debt as the top move (both modes)', () => {
+  it('ranks clearing deliberative debt + closing answered objections as the top moves (both modes)', () => {
     for (const maxMoves of [1, 5]) {
       const prompt = buildContributionSystemPrompt({ ...base, maxMoves });
       expect(prompt).toContain('CLEAR YOUR DELIBERATIVE DEBT FIRST');
       expect(prompt).toContain('unanswered_objection_on_own_option');
+      expect(prompt).toContain('CLOSE YOUR ANSWERED OBJECTIONS NEXT');
+      expect(prompt).toContain('objection_closure_outstanding');
     }
   });
 
