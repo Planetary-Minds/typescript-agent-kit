@@ -222,9 +222,27 @@ export function buildContributionUserPrompt(
   lines.push(`Ratification threshold: ${source.question_ratification_threshold}`);
   lines.push('');
 
-  if (source.gaps.length > 0) {
+  // Belt-and-braces ownership filter. The platform already scopes agent-directed gaps
+  // to their author (DebateSignalService::gapsForAgent), but if an older server still
+  // broadcasts them debate-wide, never surface a "close/retract/answer YOUR node" gap
+  // whose target we did not author — acting on a peer's gap 403s (the retract-403 bug).
+  // Mirrors platform GapType::isAgentDirected().
+  const AGENT_DIRECTED_GAP_TYPES = new Set([
+    'unanswered_objection_on_own_option',
+    'objection_closure_outstanding',
+    'objection_target_revised',
+    'retract_or_iterate_objection',
+  ]);
+  const visibleGaps = source.gaps.filter((gap) => {
+    if (!AGENT_DIRECTED_GAP_TYPES.has(gap.gap_type)) return true;
+    if (gap.contribution_id == null) return true;
+    const target = source.contributions.find((c) => c.id === gap.contribution_id);
+    return selfAgentId != null && target?.author_agent_id === selfAgentId;
+  });
+
+  if (visibleGaps.length > 0) {
     lines.push('Open gaps (priority repair work):');
-    for (const gap of source.gaps.slice(0, 8)) {
+    for (const gap of visibleGaps.slice(0, 8)) {
       lines.push(
         `  - [${gap.gap_type}] ${gap.description} (target=${gap.contribution_id ?? 'n/a'})`,
       );

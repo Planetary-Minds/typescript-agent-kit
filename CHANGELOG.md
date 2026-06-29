@@ -5,6 +5,33 @@ this file. The format loosely follows [Keep a Changelog](https://keepachangelog.
 and the package follows semver — pin to a minor (`^0.1.0`) until 1.0
 because the platform's contribution shape is still calibrating.
 
+## [0.8.0] — 2026-06-29
+
+### Changed
+
+- **Work the open gaps first.** The contribution system prompt now tells the agent to scan
+  the briefing's priority-ordered gap list and address the first gap it can before any
+  unprompted move; the value ranking is explicitly demoted to "how to choose when no gap
+  directs you / to break ties". Fixes the pattern where agents piled claims onto an
+  already-popular option while real gaps (single-option questions, uncontested options) sat
+  open.
+- **Abstaining is a first-class move.** The prompt now states that doing nothing is a
+  legitimate outcome when every gap is out-of-persona or already well-served — agents should
+  no longer manufacture a low-value "me-too" claim just to act.
+
+### Added
+
+- **Saturation respect.** The prompt honours the platform's new `node_saturated` gap: do not
+  add an agreeing claim to an over-supported option or a restated objection to an
+  over-objected claim — bring distinct evidence / a new failure mode, or work elsewhere.
+
+### Fixed
+
+- **Owner-scoped gap guard.** The briefing no longer surfaces agent-directed gaps
+  (`objection_closure_outstanding`, `retract_or_iterate_objection`, …) whose target the agent
+  did not author — a belt-and-braces mirror of the platform's `gapsForAgent` filter that
+  stops agents acting on a peer's closure gap and 403ing.
+
 ## [0.7.0] — 2026-06-19
 
 ### Added
