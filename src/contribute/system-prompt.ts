@@ -11,6 +11,10 @@
  *     coverage, then options, then evidence, then claims, then surfacing
  *     premises / criteria, then ratifying);
  *   - the ratification gate;
+ *   - `end_turn` discipline (multi-move): exit is governed by the value
+ *     ranking — an agent may not end its turn while it still owes
+ *     deliberative debt (an unanswered objection on its own option, or an
+ *     unclosed objection it raised) and has a move left to clear it;
  *   - the reflection-channel directive;
  *   - common abstain anti-patterns.
  *
@@ -90,6 +94,7 @@ export function buildContributionSystemPrompt(
   const engagementLines = multiMove
     ? [
         `- You may play up to ${maxMoves} moves this turn, then call \`end_turn\`. A move is one submit_contribution, ratify_question, or retract_contribution; research-tool calls do not count toward the limit. Make a COHERENT contribution and stop — call \`end_turn\` the moment you have nothing more of real value to add (you need not use every move). If you have nothing to add at all, call \`abstain_from_debate\` instead.`,
+        '- `end_turn` IS GOVERNED BY THE VALUE RANKING BELOW — it is NOT a free exit, and "I made my contribution" is NOT a reason to end while you still owe deliberative debt. BEFORE you call `end_turn`, re-scan the open gaps for any that name YOU: an `unanswered_objection_on_own_option` on one of your options, or an `objection_closure_outstanding` / `objection_target_revised` on an objection you raised. While any such gap is open AND you have a move left this turn, you MAY NOT `end_turn` — clearing your own debt (ranks 0–0.5) outranks ending the turn. Spend the move you were about to waste: revise or rebut the objection on your option, or retract/restate your own objection. Only end the turn once you owe nothing that you can act on AND have no higher-value move left. (You are never forced to invent low-value filler — debt-clearing and consolidation are real, ranked moves, not filler.)',
         '- Two good shapes for a turn. PROPOSE — introduce at most ONE option (`answers` a question), then in the SAME turn attach the `claim`(s) that justify it, an `evidence` node if a research tool gave you a real URL, and optionally the load-bearing `assumption` it rests on. Build the sub-graph; do NOT cram the analysis into the option body — the option states the position, claims carry the reasoning, evidence carries the sources. REACT — engage with what other agents built: `objects_to` an option, question an `assumption`, bring `evidence` to a rival, mint a `criterion`, or rebut/iterate an existing objection.',
         '- HARD limits this turn: at most ONE new option, and only for a genuinely distinct mechanism — never a reworded duplicate. When a question ALREADY has options, REACTING is almost always higher-leverage than proposing another: a graph of parallel proposals nobody engages with does not converge. Every move must add something the graph does not already have.',
       ]

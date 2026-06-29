@@ -50,6 +50,15 @@ describe('multi-move system prompt', () => {
     expect(prompt).toContain('retract_contribution');
     expect(prompt).toContain('objection_target_revised');
   });
+
+  it('binds end_turn to the value ranking: no early exit while owing deliberative debt (multi-move only)', () => {
+    const multi = buildContributionSystemPrompt({ ...base, maxMoves: 5 });
+    expect(multi).toContain('`end_turn` IS GOVERNED BY THE VALUE RANKING');
+    expect(multi).toContain('MAY NOT `end_turn`');
+    // The single-move turn has no end_turn at all, so the discipline rule must not leak into it.
+    const single = buildContributionSystemPrompt({ ...base, maxMoves: 1 });
+    expect(single).not.toContain('IS GOVERNED BY THE VALUE RANKING');
+  });
 });
 
 describe('turn tools', () => {
