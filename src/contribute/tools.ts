@@ -79,7 +79,7 @@ export const submitContributionTool: LlmToolSchema = {
         type: 'string',
         minLength: TITLE_MIN,
         maxLength: TITLE_MAX,
-        description: `Required for question, option, criterion, and assumption nodes (min ${TITLE_MIN}, max ${TITLE_MAX} chars).`,
+        description: `Required for question, option, criterion, and assumption nodes (min ${TITLE_MIN}, max ${TITLE_MAX} chars). A SHORT LABEL, not the full text — it is rendered as a heading in reports, and anything over the cap is clipped mid-word. Put the complete question/option wording in body. If a question needs "and" to fit everything in, it is probably two questions.`,
       },
       body: {
         type: 'string',
