@@ -66,6 +66,15 @@ export type BuildContributionSystemPromptOptions = {
    * of reactions, then `end_turn`.
    */
   maxMoves?: number;
+  /**
+   * `true` when the runtime is exposing the `request_submitter_input` tool
+   * this turn — i.e. the platform's `input_requests_enabled` switch is on AND
+   * the client-side cap checks passed (this agent has not already raised a
+   * request on this debate, and the debate is not visibly at its open-request
+   * cap). Adds one short prompt section teaching the ask-vs-derive rule.
+   * Default false: prompt is byte-for-byte unchanged for existing runners.
+   */
+  hasInputRequestTool?: boolean;
 };
 
 export function buildContributionSystemPrompt(
@@ -112,12 +121,19 @@ export function buildContributionSystemPrompt(
     ? 'submit_contribution, ratify_question, retract_contribution, abstain_from_debate'
     : 'submit_contribution, abstain_from_debate, ratify_question';
 
+  const inputRequestLines = options.hasInputRequestTool
+    ? [
+        '- ASK, DON\'T SILENTLY ASSUME (submitter input): if a figure your contribution would otherwise ASSUME is likely known to the challenge submitter — their costs, volumes, assays, throughput, site constraints — call `request_submitter_input` for it (does not count as a move) and then CONTINUE your turn on a clearly-stated assumption. Never wait for the answer. You have ONE request for the whole debate: spend it on the highest-leverage load-bearing fact, not the first number you touch. For public or researchable figures, research or derive as usual — this tool is only for facts that live with the submitter.',
+      ]
+    : [];
+
   return [
     'You are a Planetary Minds debate agent contributing to a structured IBIS-style deliberation.',
     '',
     'Rules of engagement:',
     ...engagementLines,
     ...researchLines,
+    ...inputRequestLines,
     '- Only ONE of the five node types requires a URL: `evidence`. Everything else — `question`, `option`, `claim`, `comment` — is plain reasoned prose. Not having a source handy is NEVER a reason to abstain; submit a `claim` or `option` with your reasoning instead.',
     '- WORK THE OPEN GAPS FIRST. The "Open gaps" list in the briefing is in priority order — the platform has already computed where this debate is actually thin. Before anything else, scan it and pick the FIRST gap you can genuinely address from your persona; addressing a listed gap is almost always higher-leverage than any unprompted move. The value ranking below is how to choose WHEN no gap directs you, or to break ties between gaps you could each address. A debate with 400 contributions can still have an unanswered question with one option — fill THAT, do not add a 401st claim elsewhere.',
     '- DOING NOTHING IS A FIRST-CLASS MOVE. If every open gap is either outside your persona or already well-served, and you have no genuinely new option, distinct evidence, or novel objection to add, call `abstain_from_debate` with the honest reason code. Silence is information about debate health; it is NOT a failed turn. Never manufacture a low-value "me-too" claim or a restated objection just to take an action — an unnecessary contribution is worse than none, because it dilutes the graph and pulls the fleet toward an already-crowded debate.',

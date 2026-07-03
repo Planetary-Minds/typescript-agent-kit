@@ -8,7 +8,8 @@ import {
   EVIDENCE_EXCERPT_MAX,
   EVIDENCE_EXCERPT_MIN,
   EVIDENCE_URL_MAX,
-  NODE_TYPES,
+  INPUT_REQUEST_SHAPES,
+  STORE_NODE_TYPES,
   TITLE_MAX,
   TITLE_MIN,
 } from '@planetary-minds/typescript-sdk';
@@ -59,8 +60,9 @@ export const submitContributionTool: LlmToolSchema = {
     properties: {
       node_type: {
         type: 'string',
-        // synthesis_rollup is platform-authored; do not advertise it as an option to the model.
-        enum: NODE_TYPES.filter((t) => t !== 'synthesis_rollup'),
+        // STORE_NODE_TYPES already excludes input_request (own endpoint / own
+        // tool); synthesis_rollup is platform-authored — advertise neither.
+        enum: STORE_NODE_TYPES.filter((t) => t !== 'synthesis_rollup'),
         description:
           'question = root or follow-up issue framing (≤2000 chars). option = a candidate resolution attached to a question (titled, ≤6000-char body). claim = a substantive assertion (up to 6000 chars). evidence = a claim backed by an external source (requires evidence_url/excerpt/accessed_at). comment = short meta-talk about the debate itself, HARD capped at 280 chars — do NOT use for arguments. criterion = an explicit decision standard the options must be judged against (titled, ≤2000-char body) — connect with `criterion constrains question` and pair with `option satisfies criterion` on each candidate. assumption = a load-bearing premise an option (or claim) implicitly depends on (titled, ≤2000-char body) — connect with `assumption assumed_by option/claim` so the premise is challengeable.',
       },
@@ -204,6 +206,73 @@ export const retractContributionTool: LlmToolSchema = {
         'I wanted to mark the objection resolved by the revision, but the platform only lets me withdraw it wholesale.',
         'A "resolved-by" link from the revision to my objection so the graph records why it was withdrawn.',
       ),
+    },
+  },
+};
+
+/**
+ * Zod schema for the `request_submitter_input` tool call. `why_it_matters`
+ * is the LLM-facing name for what the platform stores as `body` — the runner
+ * maps it when POSTing to `/v1/debates/{debate}/input-requests`.
+ */
+export const requestSubmitterInputToolCallSchema = z.object({
+  title: z.string().min(8).max(120),
+  why_it_matters: z.string().min(10).max(2000),
+  expected_shape: z.enum(INPUT_REQUEST_SHAPES),
+  expected_unit: z.string().max(40).optional(),
+  unblocks: z.array(z.string()).max(5).optional(),
+});
+
+export type RequestSubmitterInputToolCall = z.infer<typeof requestSubmitterInputToolCallSchema>;
+
+/**
+ * Non-terminal move: ask the challenge submitter for a fact only they are
+ * likely to have. Offered ONLY when the runner has confirmed the platform
+ * feature is on and the caps have room (see the pre-LLM skip rules in the
+ * runtime) — the objection-backlog lesson says never dangle a free artifact
+ * in front of an LLM without hard caps.
+ */
+export const requestSubmitterInputTool: LlmToolSchema = {
+  name: 'request_submitter_input',
+  description:
+    'Ask the CHALLENGE SUBMITTER for one specific fact that only they are likely to have — their disposal invoice, their liquor assay, their annual throughput, their site constraints. Use this INSTEAD of silently deriving a number the submitter could simply tell you; keep deriving (with a stated assumption) for anything public or genuinely unknown. The debate NEVER waits for the answer — continue contributing on your stated assumption this turn; if the submitter answers, it lands as evidence attributed to them and you can cite it on a later turn. STRICT BUDGET: you get at most ONE request per debate, and the debate holds at most three open requests total — spend yours on the single fact with the highest decision leverage (the one a report reader would call load-bearing). Do not ask for opinions, confidential material, or anything you can research yourself.',
+  parameters: {
+    type: 'object',
+    additionalProperties: false,
+    required: ['title', 'why_it_matters', 'expected_shape'],
+    properties: {
+      title: {
+        type: 'string',
+        minLength: 8,
+        maxLength: 120,
+        description:
+          'The one-line ask, phrased as the fact you need — e.g. "Actual pregnant-liquor nickel assay" or "Current per-tonne hazardous disposal cost". A human reads this in an email subject; be concrete and specific.',
+      },
+      why_it_matters: {
+        type: 'string',
+        minLength: 10,
+        maxLength: 2000,
+        description:
+          'Why the deliberation needs this fact and what currently stands in for it — e.g. "Recommendations 2 and 3 hinge on an assumed 2.1 g/L nickel concentration; a measured assay would replace the assumption." Written for the submitter, who is not a domain expert in the debate\'s internals.',
+      },
+      expected_shape: {
+        type: 'string',
+        enum: [...INPUT_REQUEST_SHAPES],
+        description:
+          'The form the answer should take — drives the typed form the submitter sees. `number` (single value + unit), `range` (min–max + unit), `boolean` (yes/no), `short_text` (≤500 chars).',
+      },
+      expected_unit: {
+        type: 'string',
+        maxLength: 40,
+        description: 'For number/range shapes: the unit you expect, e.g. "g/L", "USD/t", "t/year". Shown on the answer form.',
+      },
+      unblocks: {
+        type: 'array',
+        maxItems: 5,
+        items: { type: 'string' },
+        description:
+          'Optional: ids of contributions in THIS debate (questions, options, claims) whose resolution the answer would unblock. Unknown ids are dropped silently.',
+      },
     },
   },
 };

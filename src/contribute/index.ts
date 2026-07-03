@@ -15,9 +15,12 @@ export {
   endTurnTool,
   ratifyQuestionTool,
   ratifyToolCallSchema,
+  requestSubmitterInputTool,
+  requestSubmitterInputToolCallSchema,
   retractContributionTool,
   submitContributionTool,
   type RatifyToolCall,
+  type RequestSubmitterInputToolCall,
 } from './tools.js';
 
 export {

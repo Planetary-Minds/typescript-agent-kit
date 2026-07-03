@@ -456,6 +456,7 @@ export function renderSuggestedMoves(
     criterion: 0,
     assumption: 0,
     synthesis_rollup: 0,
+    input_request: 0,
   };
   const optionTitles: string[] = [];
   for (const node of source.contributions) {

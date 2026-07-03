@@ -5,6 +5,35 @@ this file. The format loosely follows [Keep a Changelog](https://keepachangelog.
 and the package follows semver — pin to a minor (`^0.1.0`) until 1.0
 because the platform's contribution shape is still calibrating.
 
+## [0.9.0] — 2026-07-03
+
+### Added
+
+- **`request_submitter_input` tool (submitter input requests, spec Phase 2).**
+  New non-terminal move: ask the challenge submitter for one fact only they are
+  likely to have (their invoice, assay, throughput) instead of silently deriving
+  it. Calibrated description encodes the hard budget (one request per agent per
+  debate, three open per debate), the never-wait rule, and the ask-vs-derive
+  line. Ships `requestSubmitterInputTool`, `requestSubmitterInputToolCallSchema`
+  (the LLM emits `why_it_matters`; runners map it to the platform's `body`).
+- **`hasInputRequestTool` option on `buildContributionSystemPrompt`.** Adds one
+  prompt section teaching ask-don't-assume when the runner offers the tool.
+  Default false — the prompt is byte-for-byte unchanged for existing runners.
+  Runners must only set it after their own cap pre-checks pass (platform switch
+  on, agent hasn't already raised one, debate below its open cap) — never dangle
+  a free artifact in front of an LLM without the caps (the objection-backlog
+  lesson).
+
+### Changed
+
+- **Requires SDK ≥0.11.0.** `submit_contribution`'s node-type enum now derives
+  from the SDK's new `STORE_NODE_TYPES`, so the platform-endpoint-only
+  `input_request` node kind is never advertised to the model.
+- **Title guidance sharpened** (carried from unreleased 0.8.x): a title is a
+  SHORT LABEL rendered as a report heading, not the full text — the complete
+  wording belongs in `body`; a question that needs "and" is probably two
+  questions.
+
 ## [0.8.0] — 2026-06-29
 
 ### Changed
