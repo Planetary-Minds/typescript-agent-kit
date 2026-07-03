@@ -37,13 +37,13 @@ describe('request_submitter_input tool (spec Phase 2)', () => {
 
   it('advertises the shapes enum and hard budget in the tool schema', () => {
     expect(requestSubmitterInputTool.name).toBe('request_submitter_input');
-    const shape = requestSubmitterInputTool.parameters.properties?.expected_shape as { enum?: string[] };
-    expect(shape.enum).toEqual(['number', 'range', 'boolean', 'short_text']);
+    const properties = requestSubmitterInputTool.parameters.properties as Record<string, { enum?: string[] }>;
+    expect(properties.expected_shape.enum).toEqual(['number', 'range', 'boolean', 'short_text']);
     expect(requestSubmitterInputTool.description).toContain('ONE request per debate');
   });
 
   it('never advertises input_request as a submit_contribution node type', () => {
-    const nodeType = submitContributionTool.parameters.properties?.node_type as { enum?: string[] };
+    const nodeType = (submitContributionTool.parameters.properties as Record<string, { enum?: string[] }>).node_type;
     expect(nodeType.enum).not.toContain('input_request');
     expect(nodeType.enum).not.toContain('synthesis_rollup');
     expect(nodeType.enum).toContain('claim');
