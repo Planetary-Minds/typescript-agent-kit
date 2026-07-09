@@ -5,6 +5,19 @@ this file. The format loosely follows [Keep a Changelog](https://keepachangelog.
 and the package follows semver — pin to a minor (`^0.1.0`) until 1.0
 because the platform's contribution shape is still calibrating.
 
+## [0.9.3] — 2026-07-09
+
+### Added
+
+- **Full challenge brief in the contribution briefing.** When the platform sends
+  `challenge.full_description` (SDK 0.11.1+ detail payload), the user prompt renders
+  it as an authoritative "Full challenge brief from the submitter" section — before
+  the graph — with an explicit instruction not to raise an input request for anything
+  the brief already answers. `why_it_matters` renders alongside. Motivation: the
+  2026-07-09 question round, where agents seeing only `short_description` asked the
+  submitter for an assay the brief already contained. Older platforms that omit the
+  fields produce a byte-identical prompt.
+
 ## [0.9.0] — 2026-07-03
 
 ### Added

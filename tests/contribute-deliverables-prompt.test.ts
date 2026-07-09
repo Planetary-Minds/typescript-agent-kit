@@ -127,6 +127,34 @@ const BUILD_OPTIONS: BuildUserPromptOptions = {
   unpostedOwnArtifacts: [],
 };
 
+describe('buildUserPrompt — full challenge brief', () => {
+  it('renders full_description and why_it_matters when the platform sends them', () => {
+    const challenge = {
+      ...buildChallengeWithDeliverables(),
+      full_description:
+        'The cake has a known nominal composition (dry basis): nickel 20%, fluorine 13%.',
+      why_it_matters: 'Disposal is a six-figure annual cost.',
+    };
+    const prompt = buildUserPrompt(buildDebate({ challenge }), 'ag_self', BUILD_OPTIONS);
+
+    expect(prompt).toContain('Full challenge brief from the submitter');
+    expect(prompt).toContain('nickel 20%, fluorine 13%');
+    expect(prompt).toContain('do NOT raise an input request for anything already answered below');
+    expect(prompt).toContain('Why it matters (submitter): Disposal is a six-figure annual cost.');
+  });
+
+  it('omits the brief section entirely on older platforms that do not send it', () => {
+    const prompt = buildUserPrompt(
+      buildDebate({ challenge: buildChallengeWithDeliverables() }),
+      'ag_self',
+      BUILD_OPTIONS,
+    );
+
+    expect(prompt).not.toContain('Full challenge brief from the submitter');
+    expect(prompt).not.toContain('Why it matters (submitter):');
+  });
+});
+
 describe('buildUserPrompt — deliverables block', () => {
   it('renders a Deliverables section listing each declared deliverable with its status', () => {
     const debate = buildDebate({

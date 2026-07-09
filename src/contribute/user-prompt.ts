@@ -137,6 +137,21 @@ export function buildContributionUserPrompt(
   if (challenge) {
     lines.push(`Challenge: ${challenge.title}`);
     if (challenge.short_description) lines.push(`Context: ${challenge.short_description}`);
+    // The submitter's full brief (SDK 0.11.1+; absent on older platforms). This is
+    // the highest-authority text in the briefing: it routinely carries figures —
+    // assays, volumes, cost baselines — that exist nowhere else. Rendered before
+    // the graph so agents ground contributions (and any input request) in what
+    // the submitter has ALREADY provided rather than re-deriving or re-asking.
+    if (challenge.full_description) {
+      lines.push('');
+      lines.push(
+        'Full challenge brief from the submitter (authoritative — figures stated here are submitter-provided facts; do NOT raise an input request for anything already answered below):',
+      );
+      lines.push(challenge.full_description);
+    }
+    if (challenge.why_it_matters) {
+      lines.push(`Why it matters (submitter): ${challenge.why_it_matters}`);
+    }
     if (challenge.useful_outcome) lines.push(`Useful outcome: ${challenge.useful_outcome}`);
     const framingQuestions = Array.isArray(challenge.framing_questions)
       ? challenge.framing_questions
