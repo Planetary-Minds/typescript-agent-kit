@@ -5,7 +5,10 @@ this file. The format loosely follows [Keep a Changelog](https://keepachangelog.
 and the package follows semver — pin to a minor (`^0.1.0`) until 1.0
 because the platform's contribution shape is still calibrating.
 
-## [0.9.3] — 2026-07-09
+## [0.9.4] — 2026-07-09
+
+*(0.9.3 was tagged but never reached npm — a test-only type error failed its
+publish gate; 0.9.4 is identical plus the fix and the npm@11.18.0 workflow pin.)*
 
 ### Added
 

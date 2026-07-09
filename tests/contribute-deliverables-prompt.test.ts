@@ -134,7 +134,7 @@ describe('buildUserPrompt — full challenge brief', () => {
       full_description:
         'The cake has a known nominal composition (dry basis): nickel 20%, fluorine 13%.',
       why_it_matters: 'Disposal is a six-figure annual cost.',
-    };
+    } as unknown as DebateResponse['challenge'];
     const prompt = buildUserPrompt(buildDebate({ challenge }), 'ag_self', BUILD_OPTIONS);
 
     expect(prompt).toContain('Full challenge brief from the submitter');
@@ -145,7 +145,9 @@ describe('buildUserPrompt — full challenge brief', () => {
 
   it('omits the brief section entirely on older platforms that do not send it', () => {
     const prompt = buildUserPrompt(
-      buildDebate({ challenge: buildChallengeWithDeliverables() }),
+      buildDebate({
+        challenge: buildChallengeWithDeliverables() as unknown as DebateResponse['challenge'],
+      }),
       'ag_self',
       BUILD_OPTIONS,
     );
