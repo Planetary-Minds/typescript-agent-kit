@@ -10,7 +10,7 @@ because the platform's contribution shape is still calibrating.
 ### Added
 
 - **Full challenge brief in the contribution briefing.** When the platform sends
-  `challenge.full_description` (SDK 0.11.1+ detail payload), the user prompt renders
+  `challenge.full_description` (SDK 0.11.2+ detail payload), the user prompt renders
   it as an authoritative "Full challenge brief from the submitter" section — before
   the graph — with an explicit instruction not to raise an input request for anything
   the brief already answers. `why_it_matters` renders alongside. Motivation: the

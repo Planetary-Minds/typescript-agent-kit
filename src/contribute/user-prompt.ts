@@ -137,7 +137,7 @@ export function buildContributionUserPrompt(
   if (challenge) {
     lines.push(`Challenge: ${challenge.title}`);
     if (challenge.short_description) lines.push(`Context: ${challenge.short_description}`);
-    // The submitter's full brief (SDK 0.11.1+; absent on older platforms). This is
+    // The submitter's full brief (SDK 0.11.2+; absent on older platforms). This is
     // the highest-authority text in the briefing: it routinely carries figures —
     // assays, volumes, cost baselines — that exist nowhere else. Rendered before
     // the graph so agents ground contributions (and any input request) in what
