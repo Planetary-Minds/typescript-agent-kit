@@ -72,3 +72,34 @@ describe('buildContributionSystemPrompt — input-request section', () => {
     expect(prompt).toContain('ONE request');
   });
 });
+
+describe('buildContributionSystemPrompt — objection-churn steer', () => {
+  const base = {
+    personality: 'A pragmatic process engineer.',
+    hasResearchTools: false,
+    hasUnpostedOwnArtifacts: false,
+    maxMoves: 5,
+  };
+
+  it('is byte-for-byte unchanged when the debate is not churning', () => {
+    const withoutFlag = buildContributionSystemPrompt(base);
+    const explicitFalse = buildContributionSystemPrompt({ ...base, debateIsChurning: false });
+    expect(explicitFalse).toBe(withoutFlag);
+    expect(withoutFlag).not.toContain('THIS DEBATE IS CHURNING');
+  });
+
+  it('suspends new objections and redirects to resolution when churning', () => {
+    const prompt = buildContributionSystemPrompt({ ...base, debateIsChurning: true });
+    expect(prompt).toContain('THIS DEBATE IS CHURNING');
+    expect(prompt).toContain('SUSPENDED');
+    // steers to the three resolution avenues + abstention
+    expect(prompt).toContain('CLOSE ONE OF YOUR OWN OPEN LOOPS');
+    expect(prompt).toContain('abstain_from_debate');
+    expect(prompt).toContain('POSITIVE act for debate health');
+  });
+
+  it('places the churn steer ahead of the value ranking so it dominates the turn', () => {
+    const prompt = buildContributionSystemPrompt({ ...base, debateIsChurning: true });
+    expect(prompt.indexOf('THIS DEBATE IS CHURNING')).toBeLessThan(prompt.indexOf('Value ranking of moves'));
+  });
+});

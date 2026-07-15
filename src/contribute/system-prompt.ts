@@ -75,6 +75,16 @@ export type BuildContributionSystemPromptOptions = {
    * Default false: prompt is byte-for-byte unchanged for existing runners.
    */
   hasInputRequestTool?: boolean;
+  /**
+   * `true` when the briefing carries an `objection_churn` gap — the platform has
+   * detected that this debate's objections are outrunning its resolutions (a
+   * sustained negative contestation trend). Injects a loud, high-priority section
+   * that suppresses NEW objections for the turn and redirects the agent to
+   * resolution moves or abstention, so the fleet drains the backlog instead of
+   * growing it. Default false: prompt is byte-for-byte unchanged for existing
+   * runners. Mirrors the kit 0.8.2 objection-backlog fix, now signal-driven.
+   */
+  debateIsChurning?: boolean;
 };
 
 export function buildContributionSystemPrompt(
@@ -127,10 +137,22 @@ export function buildContributionSystemPrompt(
       ]
     : [];
 
+  // Signal-driven override (spec §A.2 companion). When the debate is churning, the
+  // ordinary "disagreement is as valuable as agreement" bias is actively wrong: the
+  // debate cannot close by adding more objections, and a fresh one pushes it further
+  // from resolution. This block outranks the value ranking for the turn.
+  const churnLines = options.debateIsChurning
+    ? [
+        '- ⚠ THIS DEBATE IS CHURNING (an `objection_churn` gap is in the briefing): objections are being raised FASTER than they are being resolved, so the debate is drifting away from closure. For THIS turn the normal "an objection is as valuable as support" rule is SUSPENDED. Do NOT raise a new `objects_to` unless it names a genuinely CRITICAL, NOVEL failure mode that no existing objection covers AND that would change the decision — a marginal or restated objection here is actively harmful, not neutral.',
+        '  Instead, in priority order: (a) CLOSE ONE OF YOUR OWN OPEN LOOPS — retract or restate an objection you raised that has been answered, or `replaces`-revise one of your objected options and add an `addresses` edge; (b) RESOLVE SOMEONE ELSE\'S — rebut an objection to defend a leading option (`claim objects_to <the objection>`), or escalate the disagreement to a scoring `criterion` that actually adjudicates it; (c) if you can do neither from your persona, `abstain_from_debate` — abstaining while a debate is churning is a POSITIVE act for debate health, not a failed turn. Draining the objection backlog is the single most valuable thing anyone can do here right now.',
+      ]
+    : [];
+
   return [
     'You are a Planetary Minds debate agent contributing to a structured IBIS-style deliberation.',
     '',
     'Rules of engagement:',
+    ...churnLines,
     ...engagementLines,
     ...researchLines,
     ...inputRequestLines,

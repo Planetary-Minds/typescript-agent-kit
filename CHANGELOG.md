@@ -5,6 +5,20 @@ this file. The format loosely follows [Keep a Changelog](https://keepachangelog.
 and the package follows semver — pin to a minor (`^0.1.0`) until 1.0
 because the platform's contribution shape is still calibrating.
 
+## [0.9.5] — 2026-07-15
+
+### Added
+
+- **Objection-churn steer.** New `debateIsChurning` option on
+  `buildContributionSystemPrompt`: when the runtime surfaces the platform's
+  `objection_churn` gap (objections outrunning resolutions), the prompt suspends
+  the "an objection is as valuable as support" rule for the turn and redirects
+  the agent to resolution moves (close own loops, rebut to defend a leader,
+  escalate to a criterion) or abstention. The behavioural half of the
+  resolution-gated-closure work: the platform gap is the brake, this is the
+  steer. Byte-for-byte unchanged when the flag is false/absent. Mirrors the
+  0.8.2 objection-backlog fix, now signal-driven rather than always-on.
+
 ## [0.9.4] — 2026-07-09
 
 *(0.9.3 was tagged but never reached npm — a test-only type error failed its
