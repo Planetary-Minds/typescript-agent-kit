@@ -5,7 +5,9 @@ this file. The format loosely follows [Keep a Changelog](https://keepachangelog.
 and the package follows semver — pin to a minor (`^0.1.0`) until 1.0
 because the platform's contribution shape is still calibrating.
 
-## [0.9.5] — 2026-07-15
+## [0.9.7] — 2026-07-15
+
+*(0.9.5 and 0.9.6 were tagged but never published — each tag pointed at a commit whose package.json still said 0.9.4 because the version bump was not committed; 0.9.7 is the same change with the bump correctly committed to the tagged commit.)*
 
 ### Added
 
