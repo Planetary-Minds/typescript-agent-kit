@@ -85,6 +85,16 @@ export type BuildContributionSystemPromptOptions = {
    * runners. Mirrors the kit 0.8.2 objection-backlog fix, now signal-driven.
    */
   debateIsChurning?: boolean;
+  /**
+   * Phase of the open debate when the platform's phase model is enabled
+   * (`exploration` | `deliberation` | `convergence`), or null/undefined when it
+   * is not. Injects a phase block that re-weights the move ranking for the
+   * turn: exploration rewards breadth/novelty and defers objections (soft
+   * `concerns` instead); deliberation freezes the option set and prosecutes;
+   * convergence pushes resolution and closure. Default absent: prompt is
+   * byte-for-byte unchanged for existing runners.
+   */
+  debatePhase?: string | null;
 };
 
 export function buildContributionSystemPrompt(
@@ -148,10 +158,33 @@ export function buildContributionSystemPrompt(
       ]
     : [];
 
+  // Phase model (platform docs/PHASE-MODEL-SPEC.md): diverge, then converge.
+  // Each block re-weights the move ranking for the turn; the underlying wire
+  // rules (edge grammar, ratification, debt gates) are unchanged.
+  const phaseLines =
+    options.debatePhase === 'exploration'
+      ? [
+          '- ⚑ THIS DEBATE IS EXPLORING (phase=exploration): the platform is deliberately widening the solution space before scrutiny begins, and your persona\'s job this turn is BREADTH. Re-weight the value ranking: a genuinely NOVEL option — a non-obvious mechanism, an adjacent-field transfer, a challenge to the framing — is the single most valuable move you can make, and `underexplored_question` gaps name exactly where. Bold is safe here: objections are deferred, so a speculative option cannot be shot down yet, and grounding is NOT required at birth — propose first, substantiate later. Do NOT propose a reworded duplicate of an existing option; different mechanism or nothing.',
+          '- OBJECTIONS ARE DEFERRED THIS PHASE. The server rejects `objects_to` (409 OBJECTION_DEFERRED_EXPLORATION). If you see a real flaw, log it as a soft CONCERN instead: submit the same claim/evidence with `edge_type=concerns` against the node it worries you on. Concerns carry no contestation weight now; when the option set freezes you will be gap-nudged (`prosecute_deferred_concern`) to re-assert each as a first-class objection or retract it. Spending a move on a concern is real work, not a wasted turn.',
+          '- Evidence-gathering is rewarded even when it does not attack or defend anything yet — building the shared evidence base IS exploration. Sub-questions (`raises`) and criteria that open new axes of the space rank higher than usual this phase.',
+        ]
+      : options.debatePhase === 'deliberation'
+        ? [
+            '- ⚑ THIS DEBATE IS DELIBERATING (phase=deliberation): exploration is over and the option set is FROZEN — the server rejects brand-new options (409 OPTION_SET_FROZEN). Your job this turn is RIGOUR: prosecute the frozen set. Ground options with `evidence supports`, attack weak ones with `objects_to`, surface load-bearing assumptions, mint criteria that adjudicate between rivals, and work the grounding gaps (`evidenceless_option`, `under_supported_option`, `leader_lacks_evidence`, `unsourced_figure`) — they are now in force and block maturation.',
+            '- If a `prosecute_deferred_concern` gap names a concern YOU logged during exploration, clearing it is TOP priority (rank it with your deliberative debt): re-assert it as a first-class objection (`claim objects_to` the same target) if it still holds, or `retract_contribution` it if the record has answered it. Deferred concerns must not rot as shadow objections.',
+            '- Revising an option you author is still open — supersede it via `replaces_contribution_id` (never a new free-standing option). The position is immutable; its support is what moves.',
+          ]
+        : options.debatePhase === 'convergence'
+          ? [
+              '- ⚑ THIS DEBATE IS CONVERGING (phase=convergence): the testing is done and the debate is closing. Your job this turn is RESOLUTION: close your own loops first (retract or restate answered objections, revise-and-`addresses` your objected options), then help resolve others\' — rebut objections against the leading option, or escalate a genuinely stuck disagreement to a scoring `criterion`. Raise a NEW objection only for a critical, novel, decision-changing failure mode; the bar is much higher than usual. No new options (the set is frozen); if nothing needs you, `abstain_from_debate` is a positive act here.',
+            ]
+          : [];
+
   return [
     'You are a Planetary Minds debate agent contributing to a structured IBIS-style deliberation.',
     '',
     'Rules of engagement:',
+    ...phaseLines,
     ...churnLines,
     ...engagementLines,
     ...researchLines,

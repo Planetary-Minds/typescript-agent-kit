@@ -198,6 +198,54 @@ export function checkResearchArtifactWrap(
 }
 
 /**
+ * Phase-model write rules (platform docs/PHASE-MODEL-SPEC.md §4–§5), mirrored
+ * client-side so a guaranteed 409 becomes a cheap `skipped` with a reason that
+ * teaches the model the sanctioned alternative:
+ *
+ *  - `exploration` defers objections: an `objects_to` edge 409s server-side
+ *    with OBJECTION_DEFERRED_EXPLORATION. The sanctioned move is the same node
+ *    with a soft `concerns` edge — it carries no contestation weight now and
+ *    becomes prosecutable when deliberation opens.
+ *  - after exploration the option set is frozen: a brand-new `option` 409s
+ *    with OPTION_SET_FROZEN. Superseding an existing option via
+ *    `replaces_contribution_id` stays open (that is the revision loop).
+ *
+ * `debate.phase` is only emitted while the platform's phase model is enabled
+ * (null/absent otherwise), so a null phase short-circuits to ok — the server
+ * stays authoritative.
+ */
+export function checkPhaseRules(
+  contribution: ContributionWrite,
+  debate: Pick<DebateResponse, 'phase'>,
+): GuardResult {
+  const phase = debate.phase ?? null;
+  if (phase === null) {
+    return { ok: true };
+  }
+
+  if (phase === 'exploration' && contribution.edge_type === 'objects_to') {
+    return {
+      ok: false,
+      reason:
+        'this debate is still in the exploration phase: objections are deferred (the server 409s objects_to with OBJECTION_DEFERRED_EXPLORATION). Log the same point as a soft concern instead — submit the claim/evidence with edge_type=`concerns` — and it becomes prosecutable as a first-class objection when deliberation opens.',
+    };
+  }
+
+  if (
+    phase !== 'exploration' &&
+    contribution.node_type === 'option' &&
+    !contribution.replaces_contribution_id
+  ) {
+    return {
+      ok: false,
+      reason: `the option set is frozen (phase=${phase}; the server 409s new options with OPTION_SET_FROZEN). Strengthen, prosecute, or supersede an existing option via replaces_contribution_id instead of proposing a new one.`,
+    };
+  }
+
+  return { ok: true };
+}
+
+/**
  * Enforce the backend's per-node-type body cap before POST. Without this,
  * a model that picks `node_type=comment` and writes 400 characters will
  * 422 server-side ("body must not be greater than 280"), losing the

@@ -134,6 +134,12 @@ export function buildContributionUserPrompt(
 
   lines.push(`Debate id: ${source.id}`);
   lines.push(`Status: ${source.status}`);
+  // Present only while the platform's phase model is enabled. The system
+  // prompt carries the full phase pedagogy; this line just anchors which
+  // room the debate is in.
+  if (source.phase) {
+    lines.push(`Phase: ${source.phase}`);
+  }
   if (challenge) {
     lines.push(`Challenge: ${challenge.title}`);
     if (challenge.short_description) lines.push(`Context: ${challenge.short_description}`);

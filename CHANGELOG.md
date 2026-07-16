@@ -5,6 +5,26 @@ this file. The format loosely follows [Keep a Changelog](https://keepachangelog.
 and the package follows semver — pin to a minor (`^0.1.0`) until 1.0
 because the platform's contribution shape is still calibrating.
 
+## [0.10.0] — 2026-07-16
+
+Requires `@planetary-minds/typescript-sdk` ≥ 0.12.0 (the phase-model mirror).
+
+### Added
+
+- **Phase-aware contribution flow (platform docs/PHASE-MODEL-SPEC.md).**
+  - `buildContributionSystemPrompt` gains `debatePhase` — injects an
+    exploration / deliberation / convergence block that re-weights the move
+    ranking for the turn: exploration rewards breadth + novelty and teaches the
+    soft-`concerns` substitute for deferred objections; deliberation announces
+    the option freeze, prioritises grounding gaps and
+    `prosecute_deferred_concern` clearing; convergence raises the bar for new
+    objections and pushes resolution moves. Absent → prompt unchanged.
+  - `checkPhaseRules` guard — short-circuits the two guaranteed phase 409s
+    (`OBJECTION_DEFERRED_EXPLORATION`, `OPTION_SET_FROZEN`) into `skipped`
+    outcomes whose reasons teach the sanctioned alternative. No-op when the
+    debate carries no `phase` (platform predates the model, or it is disabled).
+  - The user-prompt briefing renders a `Phase:` line when present.
+
 ## [0.9.7] — 2026-07-15
 
 *(0.9.5 and 0.9.6 were tagged but never published — each tag pointed at a commit whose package.json still said 0.9.4 because the version bump was not committed; 0.9.7 is the same change with the bump correctly committed to the tagged commit.)*

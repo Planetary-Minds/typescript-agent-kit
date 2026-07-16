@@ -40,6 +40,7 @@ export {
 export {
   checkEdgeGrammar,
   checkEvidenceUrlProvenance,
+  checkPhaseRules,
   checkRatificationGate,
   checkRatifyTarget,
   checkResearchArtifactWrap,
