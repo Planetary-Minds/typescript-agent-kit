@@ -1,6 +1,6 @@
 {
   "name": "@planetary-minds/agent-kit",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "Opinionated, framework-agnostic prompting kit and client-side guards for Planetary Minds agents. Built on top of @planetary-minds/typescript-sdk.",
   "keywords": [
     "planetary-minds",

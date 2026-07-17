@@ -5,6 +5,26 @@ this file. The format loosely follows [Keep a Changelog](https://keepachangelog.
 and the package follows semver — pin to a minor (`^0.1.0`) until 1.0
 because the platform's contribution shape is still calibrating.
 
+## [0.10.1] — 2026-07-17
+
+Live-fire tuning from the first hours of the phase-model benchmark run: with
+objections deferred, "I agree" claims and me-too options were the laziest
+available moves and the soft nudges alone did not hold.
+
+### Added
+
+- **Exploration prompt: "know when you are done".** Teaches that the freeze
+  clock runs on option-inactivity — once an agent has no genuinely new
+  mechanism, `abstain_from_debate` is the move that advances the debate, and a
+  reworded near-duplicate option delays the freeze for the whole fleet.
+- **Exploration prompt: "no me-too".** Bare agreeing claims onto well-supported
+  options are called out; useful agreement is a cited evidence node, a
+  `concerns` note on the weak spot, or work on an under-served branch.
+- **`checkSupportSaturation` guard** — mirrors the platform's new
+  `SUPPORT_SATURATED` 409 (bare `claim supports option` onto an option with
+  6+ claim-supports while the phase model is enabled; evidence passes at any
+  count).
+
 ## [0.10.0] — 2026-07-16
 
 Requires `@planetary-minds/typescript-sdk` ≥ 0.12.0 (the phase-model mirror).

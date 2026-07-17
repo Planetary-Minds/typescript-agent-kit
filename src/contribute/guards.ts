@@ -246,6 +246,51 @@ export function checkPhaseRules(
 }
 
 /**
+ * Support-saturation ceiling (platform companion to the `node_saturated`
+ * nudge): while the phase model is enabled, a bare agreeing `claim supports
+ * option` onto an option already carrying `saturationFloor`+ claim-supports
+ * 409s server-side (SUPPORT_SATURATED). Evidence passes at any count — a new
+ * source is never a me-too. Mirrored client-side so the model loses the move
+ * as a cheap skip with a redirect instead of a round-trip 409.
+ *
+ * Counting uses the debate detail payload's head set; the server is
+ * authoritative on the exact number. Skipped when the debate carries no
+ * `phase` (model off / older platform).
+ */
+export function checkSupportSaturation(
+  contribution: ContributionWrite,
+  debate: Pick<DebateResponse, 'phase' | 'contributions' | 'edges'>,
+  saturationFloor = 6,
+): GuardResult {
+  if (!debate.phase) {
+    return { ok: true };
+  }
+  if (contribution.node_type !== 'claim' || contribution.edge_type !== 'supports' || !contribution.parent_id) {
+    return { ok: true };
+  }
+  const target = debate.contributions.find((c) => c.id === contribution.parent_id);
+  if (!target || target.node_type !== 'option') {
+    return { ok: true };
+  }
+  const claimIds = new Set(
+    debate.contributions.filter((c) => c.node_type === 'claim').map((c) => c.id),
+  );
+  const claimSupports = debate.edges.filter(
+    (e) =>
+      e.edge_type === 'supports' &&
+      e.to_contribution_id === target.id &&
+      claimIds.has(e.from_contribution_id),
+  ).length;
+  if (claimSupports >= saturationFloor) {
+    return {
+      ok: false,
+      reason: `option ${target.id} already has ${claimSupports} supporting claims — another agreeing claim adds nothing (the server 409s it with SUPPORT_SATURATED). Bring a cited evidence node, log a concern on its weak spot, work an under-served branch, or abstain.`,
+    };
+  }
+  return { ok: true };
+}
+
+/**
  * Enforce the backend's per-node-type body cap before POST. Without this,
  * a model that picks `node_type=comment` and writes 400 characters will
  * 422 server-side ("body must not be greater than 280"), losing the

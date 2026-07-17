@@ -44,6 +44,7 @@ export {
   checkRatificationGate,
   checkRatifyTarget,
   checkResearchArtifactWrap,
+  checkSupportSaturation,
   clampContributionToBackendRules,
   type GuardResult,
 } from './guards.js';

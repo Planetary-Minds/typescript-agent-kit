@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ContributionWrite } from '@planetary-minds/typescript-sdk';
-import { checkPhaseRules } from '../src/contribute/guards.js';
+import { checkPhaseRules, checkSupportSaturation } from '../src/contribute/guards.js';
 import { buildContributionSystemPrompt } from '../src/contribute/system-prompt.js';
 
 /**
@@ -56,6 +56,54 @@ describe('checkPhaseRules', () => {
     const revision = { ...newOption, replaces_contribution_id: 'opt_1' };
     expect(checkPhaseRules(revision, { phase: 'deliberation' }).ok).toBe(true);
     expect(checkPhaseRules(objection, { phase: 'deliberation' }).ok).toBe(true);
+  });
+});
+
+describe('checkSupportSaturation', () => {
+  const option = { id: 'opt_1', node_type: 'option' } as never;
+  const claims = Array.from({ length: 6 }, (_, i) => ({ id: `c_${i}`, node_type: 'claim' }) as never);
+  const supports = claims.map(
+    (c: { id: string }) =>
+      ({ edge_type: 'supports', from_contribution_id: c.id, to_contribution_id: 'opt_1' }) as never,
+  );
+  const meToo: ContributionWrite = {
+    node_type: 'claim',
+    body: 'I also agree with this route.',
+    parent_id: 'opt_1',
+    edge_type: 'supports',
+  };
+
+  it('blocks a bare claim-support onto a saturated option', () => {
+    const result = checkSupportSaturation(meToo, {
+      phase: 'exploration',
+      contributions: [option, ...claims],
+      edges: supports,
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.reason).toContain('SUPPORT_SATURATED');
+  });
+
+  it('passes below the floor, for evidence, and when the phase model is off', () => {
+    expect(
+      checkSupportSaturation(meToo, {
+        phase: 'exploration',
+        contributions: [option, ...claims.slice(0, 3)],
+        edges: supports.slice(0, 3),
+      }).ok,
+    ).toBe(true);
+    expect(
+      checkSupportSaturation(
+        { ...meToo, node_type: 'evidence' },
+        { phase: 'exploration', contributions: [option, ...claims], edges: supports },
+      ).ok,
+    ).toBe(true);
+    expect(
+      checkSupportSaturation(meToo, {
+        phase: null,
+        contributions: [option, ...claims],
+        edges: supports,
+      }).ok,
+    ).toBe(true);
   });
 });
 
